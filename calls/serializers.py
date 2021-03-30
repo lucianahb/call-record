@@ -8,7 +8,6 @@ class CallRecordSerializer(serializers.ModelSerializer):
         model = CallRecord
         fields = (
             'id',
-            'call_id',
             'start_call',
             'end_call',
             'source',
