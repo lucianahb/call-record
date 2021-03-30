@@ -33,16 +33,19 @@ class BillViewSet(viewsets.ModelViewSet):
                 'period': period, 'call_record': []}
 
         if not source:
-            return Response("Invalid request. Missing source", status=status.HTTP_400_BAD_REQUEST)
+            return Response("Invalid request. Missing source",
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if period:
-            queryset = CallRecord.objects.filter(source=source).filter(end_call__year=period.split('/')[1],
-                                                                       end_call__month=period.split('/')[0])
+            queryset = CallRecord.objects.filter(source=source).filter(
+                end_call__year=period.split('/')[1],
+                end_call__month=period.split('/')[0])
         else:
             default_date = date.today().replace(day=1) - timedelta(days=1)
             bill['period'] = f'{default_date.month}/{default_date.year}'
-            queryset = CallRecord.objects.filter(source=source).filter(end_call__year=default_date.year,
-                                                                       end_call__month=default_date.month)
+            queryset = CallRecord.objects.filter(source=source).filter(
+                end_call__year=default_date.year,
+                end_call__month=default_date.month)
 
         list_call = get_list_or_404(queryset)
 
@@ -51,17 +54,20 @@ class BillViewSet(viewsets.ModelViewSet):
             start_date = call.start_call.date().strftime('%d/%b/%Y')
             start_time = call.start_call.time()
             duration = call.end_call - call.start_call
-            price = self.get_call_record_price(call.start_call, call.end_call, duration)
+            price = self.get_call_rec_price(
+                call.start_call, call.end_call, duration)
 
-            call_record = {'destination': destination, 'start_call_date': start_date,
-                           'start_call_time': start_time, 'duration': str(duration), 'price': round(price, 2)}
+            call_record = {
+                'destination': destination, 'start_call_date': start_date,
+                'start_call_time': start_time, 'duration': str(duration),
+                'price': round(price, 2)}
 
             bill['total_price'] += price
             bill['call_record'].append(call_record)
 
         return Response(data=bill, status=status.HTTP_200_OK)
 
-    def get_call_record_price(self, initial_call, final_call, duration):
+    def get_call_rec_price(self, initial_call, final_call, duration):
         t_limit_6 = time(6)
         t_limit_22 = time(22)
         end_call_time = final_call.time()
@@ -73,25 +79,38 @@ class BillViewSet(viewsets.ModelViewSet):
                 if t_limit_6 <= end_call_time <= t_limit_22:
                     charge = final_call - initial_call
                 else:
-                    charge = datetime.combine(date.min, t_limit_22) - datetime.combine(date.min, start_call_time)
+                    charge = datetime.combine(
+                        date.min, t_limit_22) - datetime.combine(
+                            date.min, start_call_time)
             else:
                 if t_limit_6 <= end_call_time <= t_limit_22:
-                    charge = datetime.combine(date.min, end_call_time) - datetime.combine(date.min, t_limit_6)
+                    charge = datetime.combine(
+                        date.min, end_call_time) - datetime.combine(
+                            date.min, t_limit_6)
                 else:
-                    charge = datetime.combine(date.min, t_limit_22) - datetime.combine(date.min, t_limit_6)
+                    charge = datetime.combine(
+                        date.min, t_limit_22) - datetime.combine(
+                            date.min, t_limit_6)
         else:
             if t_limit_6 <= start_call_time <= t_limit_22:
-                charge = datetime.combine(date.min, t_limit_22) - datetime.combine(date.min, start_call_time)
+                charge = datetime.combine(
+                    date.min, t_limit_22) - datetime.combine(
+                        date.min, start_call_time)
             if t_limit_6 <= end_call_time <= t_limit_22:
-                charge += datetime.combine(date.min, end_call_time) - datetime.combine(date.min, t_limit_6)
+                charge += datetime.combine(
+                    date.min, end_call_time) - datetime.combine(
+                        date.min, t_limit_6)
 
         total_min_charge = int(charge.total_seconds()/60)
 
         if duration.days > 0:
-            charge_per_day = datetime.combine(date.min, t_limit_22) - datetime.combine(date.min, t_limit_6)
-            total_min_charge += int(charge_per_day.total_seconds()/60) * duration.days
+            charge_per_day = datetime.combine(
+                date.min, t_limit_22) - datetime.combine(
+                    date.min, t_limit_6)
+            total_min_charge += int(
+                charge_per_day.total_seconds()/60) * duration.days
 
-        total_charge = round(total_min_charge * CALL_MIN_CHARGE + CALL_STANDING_CHARGE, 2)
+        total_charge = round(
+            total_min_charge * CALL_MIN_CHARGE + CALL_STANDING_CHARGE, 2)
 
         return total_charge
-
