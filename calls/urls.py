@@ -1,10 +1,11 @@
 from django.urls import include, path
 from rest_framework import routers
-from .views import CallRecordViewSet
+from .views import CallRecordViewSet, BillViewSet
 
 
 router = routers.DefaultRouter()
 router.register(r'Call-Record', CallRecordViewSet, basename="CallRecord")
+router.register(r'Bill', BillViewSet, basename="Bill")
 
 
 urlpatterns = [
