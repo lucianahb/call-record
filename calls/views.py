@@ -6,6 +6,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 
+CALL_STANDING_CHARGE = 0.36
+CALL_MIN_CHARGE = 0.09
+
+
 class CallRecordViewSet(viewsets.ModelViewSet):
     queryset = CallRecord.objects.all()
     serializer_class = CallRecordSerializer
@@ -18,10 +22,6 @@ class CallRecordViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-
-CALL_STANDING_CHARGE = 0.36
-CALL_MIN_CHARGE = 0.09
 
 
 class BillViewSet(viewsets.ModelViewSet):
