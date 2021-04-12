@@ -13,4 +13,4 @@ class CallRecord(models.Model):
         unique_together = ('start_call', 'end_call')
 
     def __str__(self):
-        return f"Id {self.id} | Source: {self.source} | Start at: {self.start_call}"
+        return f"Source: {self.source} | Start at: {self.start_call}"
