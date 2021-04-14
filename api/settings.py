@@ -30,8 +30,6 @@ DEBUG = config("DEBUG", default=False, cast=config.boolean)
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -83,7 +81,7 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {'default': dj_database_url.config()}
+DATABASES['default'] = dj_database_url.config(default=config('DATABASE_URL'))
 
 if not DATABASES['default']:
     DATABASES = {
